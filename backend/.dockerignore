@@ -1,0 +1,10 @@
+.git
+.gitignore
+.mvn/
+mvnw
+mvnw.cmd
+logs/
+.DS_Store
+*.log
+**/node_modules/
+**/.env
