@@ -1,140 +1,116 @@
-import { useEffect, useState } from "react";
-import API_BASE_URL from "../config";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../App";
+import { useState } from "react";
 
-const Profile = () => {
-  const [profile, setProfile] = useState(null);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
+export default function Profile() {
+  const { user, logout } = useAuth();
+  const nav = useNavigate();
+  const [activeNav, setActiveNav] = useState("profile");
 
-useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/13`); // ✅ fixed
-      const data = await response.json();
-      setProfile(data);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    }
-  };
-  fetchProfile();
-}, []);
-
-
-  // Change Password
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      setMessage("Passwords do not match!");
-      return;
-    }
-    try {
-   
-     const response = await fetch(`${API_BASE_URL}/users/2/change-password`, {
-  method: "PUT",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ password: newPassword }),
-});
-
-      if (response.ok) {
-        setMessage("✅ Password updated successfully!");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        setMessage("✅ Password updated successfully!");
-      }
-    } catch (error) {
-      console.error("Error updating password:", error);
-      setMessage("✅ Password updated successfully!");
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      logout();
+      nav("/login", { replace: true });
     }
   };
 
-  // Delete Profile
-  const handleDeleteProfile = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete your profile?");
-    if (!confirmDelete) return;
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/2`, {
-  method: "DELETE",
-});
-
-
-      if (response.ok) {
-        setMessage("🗑 Profile deleted successfully!");
-        localStorage.removeItem("token"); // or sessionStorage if you used that
-      window.location.href = "/login";  // redirect to login page
-        setProfile(null);
-      } else {
-        setMessage("🗑 Profile deleted successfully!");
-        localStorage.removeItem("token"); // or sessionStorage if you used that
-      window.location.href = "/auth/login";  // redirect to login page
-      }
-    } catch (error) {
-      console.error("🗑 Profile deleted successfully!", error);
-      localStorage.removeItem("token"); // or sessionStorage if you used that
-      window.location.href = "main";  // redirect to login page
-      setMessage("🗑 Profile deleted successfully!");
-    }
-  };
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#ECECEC] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-[#666666] mb-4">Please login to view profile</p>
+          <button
+            onClick={() => nav("/login")}
+            className="px-6 py-3 bg-[#161E54] text-white font-semibold rounded-2xl"
+          >
+            Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white shadow-lg rounded-2xl border border-gray-200">
-      <h2 className="text-2xl font-bold mb-4 text-[#0f4c5c]">My Profile</h2>
-      
-      {profile ? (
-        <div className="space-y-2 text-gray-800">
-          <p><strong>Name:</strong> {profile.name}</p>
-          <p><strong>Email:</strong> {profile.email}</p>
-          <p><strong>Phone:</strong> {profile.contact_no}</p>
+    <div className="min-h-screen bg-[#ECECEC] pb-24">
+      {/* Header */}
+      <div className="bg-white px-6 py-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-[#1A1A1A] text-center">Profile</h1>
+      </div>
+
+      {/* Profile Header with Gradient */}
+      <div className="bg-[#161E54] rounded-b-[32px] px-6 py-10 shadow-lg">
+        <div className="flex flex-col items-center">
+          {/* Avatar */}
+          <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-xl flex items-center justify-center mb-4">
+            <span className="text-4xl font-bold text-[#161E54]">
+              {user.name ? user.name[0].toUpperCase() : "U"}
+            </span>
+          </div>
+          {/* User Info */}
+          <h2 className="text-2xl font-bold text-white mb-2">{user.name || "User"}</h2>
+          <p className="text-white/90 text-sm">{user.email || "user@example.com"}</p>
         </div>
-      ) : (
-        <p className="text-gray-500">Loading profile...</p>
-      )}
+      </div>
 
-      {/* Change Password Section */}
-      <form onSubmit={handlePasswordChange} className="mt-6 space-y-3">
-        <h3 className="text-lg font-semibold text-[#5f0f40]">Change Password</h3>
-        <input
-          type="password"
-          placeholder="New Password"
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#e36414]"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#e36414]"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-[#e36414] text-white py-2 rounded-lg hover:bg-[#c65310] transition"
-        >
-          Update Password
-        </button>
-      </form>
+      {/* Profile Info Cards */}
+      <div className="px-6 py-6 space-y-4">
+        {/* Phone Card */}
+        <div className="bg-white rounded-3xl p-6 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#161E54]/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#161E54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-[#666666] mb-1">Phone</p>
+              <p className="text-[#1A1A1A] font-semibold">
+                {user.contactNo || "Not provided"}
+              </p>
+            </div>
+          </div>
+        </div>
 
-      {/* Delete Profile Button */}
-      <button
-        onClick={handleDeleteProfile}
-        className="w-full mt-6 bg-[#5f0f40] text-white py-2 rounded-lg hover:bg-[#4a0c35] transition"
-      >
-        Delete Profile
-      </button>
+        {/* Role Card */}
+        <div className="bg-white rounded-3xl p-6 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#161E54]/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#161E54]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-[#666666] mb-1">Account Type</p>
+              <p className="text-[#1A1A1A] font-semibold capitalize">{user.role || "Customer"}</p>
+            </div>
+          </div>
+        </div>
 
-      {/* Status Message */}
-      {message && (
-        <p className="mt-4 text-center text-sm text-[#0f4c5c] font-medium">
-          {message}
-        </p>
-      )}
+        {/* Action Buttons */}
+        <div className="pt-4 space-y-3">
+          {/* Edit Profile Button */}
+          <button
+            onClick={() => alert("Edit profile feature coming soon!")}
+            className="w-full py-4 bg-white text-[#161E54] font-semibold rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Profile
+          </button>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full py-4 bg-[#EF4444] text-white font-semibold rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Profile;
+}

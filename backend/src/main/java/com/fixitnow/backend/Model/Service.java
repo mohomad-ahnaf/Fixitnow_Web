@@ -1,5 +1,7 @@
 package com.fixitnow.backend.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -7,16 +9,19 @@ import jakarta.persistence.*;
 public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long serId;
     private String title, description;
     private Double price;
 
     @ManyToOne
     @JoinColumn(name = "provider_id")
+    @JsonIgnoreProperties({"password", "bookings"})
     private User provider;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cat_id")
+    @JsonIgnoreProperties({"services"})
     private Category category;
 
     // Getters & Setters

@@ -47,4 +47,9 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/providers")
+    public ResponseEntity<?> getProviders() {
+        return ResponseEntity.ok(userRepository.findByRole("provider"));
+    }
+
 }

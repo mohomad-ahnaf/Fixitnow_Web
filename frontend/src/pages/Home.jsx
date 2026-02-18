@@ -1,74 +1,127 @@
-import Hero from "../components/Hero";
-import ServiceCard from "../components/ServiceCard";
-import ReviewCard from "../components/ReviewCard";
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "../App";
-
-const demoServices = [
-  {
-    id: 1,
-    title: "Plumbing",
-    description: "Leak repairs, faucet installation, pipe fixes.",
-    price: 1500,
-    imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    title: "Electrical",
-    description: "Wiring, switchboards, appliance setup & fixes.",
-    price: 2000,
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    title: "Cleaning",
-    description: "Deep home & office cleaning, sanitization.",
-    price: 1000,
-    imageUrl: "https://images.unsplash.com/photo-1686178827149-6d55c72d81df?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGNsZWFuaW5nfGVufDB8fDB8fHww",
-  },
-];
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL, useAuth } from "../App";
 
 export default function Home() {
-  const [services, setServices] = useState(demoServices);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/services`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => {
-        if (Array.isArray(data) && data.length) {
-          const mapped = data.map((s) => ({
-            id: s.serId ?? s.id ?? s.ser_id,
-            title: s.title,
-            description: s.description,
-            price: s.price,
-            imageUrl: demoServices[(s.serId ?? s.id ?? 1) % demoServices.length].imageUrl,
-          }));
-          setServices(mapped);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const services = [
+    {
+      name: "Plumbing",
+      icon: "🔧",
+      color: "#3B82F6",
+      image: "https://plus.unsplash.com/premium_photo-1664299069577-11579b487e6c?w=600&auto=format&fit=crop&q=60"
+    },
+    {
+      name: "Electrical",
+      icon: "⚡",
+      color: "#F59E0B",
+      image: "https://plus.unsplash.com/premium_photo-1661645634440-2e747c979980?w=600&auto=format&fit=crop&q=60"
+    },
+    {
+      name: "Cleaning",
+      icon: "🧹",
+      color: "#10B981",
+      image: "https://plus.unsplash.com/premium_photo-1667520405114-47d3677f966e?w=600&auto=format&fit=crop&q=60"
+    },
+    {
+      name: "Carpentry",
+      icon: "🔨",
+      color: "#8B5CF6",
+      image: "https://images.unsplash.com/photo-1667344970482-e939871e9f25?w=600&auto=format&fit=crop&q=60"
+    },
+    {
+      name: "Painting",
+      icon: "🎨",
+      color: "#EC4899",
+      image: "https://media.istockphoto.com/id/1461683093/photo/man-painting-wall-with-light-blue-dye-indoors-back-view.webp?a=1&b=1&s=612x612&w=0&k=20&c=RJXhG4yaV1vSKKMm_d9VygS0VtGzALgGnVECZMkRNnM="
+    },
+    {
+      name: "AC Repair",
+      icon: "❄️",
+      color: "#06B6D4",
+      image: "https://plus.unsplash.com/premium_photo-1682126012378-859ca7a9f4cf?w=600&auto=format&fit=crop&q=60"
+    }
+  ];
+
+  const handleServiceClick = (serviceName) => {
+    navigate("/booking", { state: { serviceName } });
+  };
+
+  const handleNavigation = (index) => {
+    setSelectedIndex(index);
+    if (index === 0) return;
+    if (index === 1) navigate("/dashboard");
+    if (index === 2) navigate("/profile");
+  };
 
   return (
-    <>
-      <Hero />
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <h2 className="text-2xl font-bold mb-4">Popular Services</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map((s) => (
-            <ServiceCard key={s.id} service={s} />
+    <div className="min-h-screen bg-[#ECECEC] pb-20">
+      {/* Content */}
+      <div className="px-5 py-5">
+        {/* Welcome Card */}
+        <div className="bg-[#161E54] rounded-3xl p-6 shadow-lg mb-8">
+          <h1 className="text-2xl font-bold text-white mb-2">Welcome Back! sri lanka👋</h1>
+          <p className="text-white/90">What service do you need today?</p>
+        </div>
+
+        {/* Our Services Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-[#1A1A1A]">Our Services</h2>
+          <button className="text-sm text-[#F16D34] font-medium">View All</button>
+        </div>
+
+        {/* Services Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {services.map((service, index) => (
+            <div
+              key={index}
+              onClick={() => handleServiceClick(service.name)}
+              className="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300"
+              style={{
+                animation: `fadeInScale 0.6s ease-out ${index * 0.1}s both`
+              }}
+            >
+              {/* Image Section */}
+              <div className="h-32 overflow-hidden relative">
+                <img
+                  src={service.image}
+                  alt={service.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="${service.color}" width="200" height="200"/></svg>`;
+                  }}
+                />
+              </div>
+              {/* Content Section */}
+              <div className="p-3 flex flex-col items-center justify-center min-h-[80px]">
+                <span className="text-3xl mb-2" style={{ color: service.color }}>
+                  {service.icon}
+                </span>
+                <h3 className="text-sm font-semibold text-[#1A1A1A] text-center">
+                  {service.name}
+                </h3>
+              </div>
+            </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section id="reviews" className="max-w-6xl mx-auto px-4 pb-16">
-        <h3 className="text-2xl font-bold mb-4">Customer Reviews</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ReviewCard name="Ishara" review="Quick fix, professional plumber. Highly recommend!" />
-          <ReviewCard name="Nimal" review="Electrician was on time and solved the issue fast." />
-          <ReviewCard name="Sahan" review="Great cleaning service. Worth the price!" />
-        </div>
-      </section>
-    </>
+      <style>{`
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+    </div>
   );
 }

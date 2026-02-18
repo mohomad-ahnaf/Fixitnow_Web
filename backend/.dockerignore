@@ -1,10 +1,10 @@
-.git
-.gitignore
+target/
 .mvn/
 mvnw
 mvnw.cmd
-logs/
-.DS_Store
-*.log
-**/node_modules/
-**/.env
+*.md
+.git
+.gitignore
+.idea/
+.vscode/
+*.iml
